@@ -69,7 +69,37 @@ app.get("/pin", (req, res) => {
   res.json(getPinWithTimeInfo());
 });
 
+// Endpoint para keep-alive ping
+app.get('/ping', (req, res) => {
+  res.json({ 
+    status: 'alive', 
+    timestamp: Date.now(),
+    currentPin: getPinWithTimeInfo()
+  });
+});
+
 server.listen(PORT, () => {
   console.log(`Servidor en puerto ${PORT}`);
   console.log(`Socket.io configurado y listo`);
 });
+
+// Keep-alive ping cada 10 minutos para evitar que Render duerma el servicio
+if (process.env.NODE_ENV === 'production') {
+  const RENDER_URL = process.env.RENDER_EXTERNAL_URL;
+  
+  if (RENDER_URL) {
+    setInterval(async () => {
+      try {
+        const fetch = (await import('node-fetch')).default;
+        const response = await fetch(`${RENDER_URL}/ping`);
+        console.log('Keep-alive ping exitoso:', response.status);
+      } catch (error) {
+        console.log('Keep-alive ping falló:', error.message);
+      }
+    }, 10 * 60 * 1000); // Cada 10 minutos
+    
+    console.log('Keep-alive configurado para:', RENDER_URL);
+  } else {
+    console.log('RENDER_EXTERNAL_URL no configurado - keep-alive deshabilitado');
+  }
+}
