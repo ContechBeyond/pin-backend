@@ -21,7 +21,7 @@ app.use(express.static('.'));
 
 let currentPin = generatePin();
 let pinGeneratedAt = Date.now();
-const PIN_DURATION = 0.17 * 60 * 1000; // 30 segundos
+const PIN_DURATION = 5 * 60 * 1000; // 5 minutos
 
 function generatePin() {
   let pin = '';
